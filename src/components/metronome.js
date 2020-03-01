@@ -56,9 +56,9 @@ const Metronome = () => {
     <h3>My Beats</h3>
 
     <div style={{marginBottom: "5px"}}>
-      <button onClick={() => setBpm(increase())}>+</button>
-      <span style={{margin: "0 5px"}}>{bpm}</span>
       <button onClick={() => setBpm(decrease())}>-</button>
+      <span style={{margin: "0 5px"}}>{bpm}</span>
+      <button onClick={() => setBpm(increase())}>+</button>
     </div>
 
     <button onClick={() => doStart(!started)}>{started ? "stop" : "start"}</button>
