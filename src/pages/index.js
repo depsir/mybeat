@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import Metronome from '../components/metronome'
-import { GlobalHotKeys, HotKeys } from "react-hotkeys"
+import { GlobalHotKeys} from "react-hotkeys"
 import Help from "../components/help"
 
 export default () => {

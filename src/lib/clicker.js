@@ -53,14 +53,11 @@ export function nextNote(tempo) {
 
 // call this periodically to schedule notes
 export function scheduleNextClicks(tempo, noteResolution) {
-  console.log(`scheduling at ${tempo} bpm`)
-
   // while there are notes that will need to play before the next interval,
   // schedule them and advance the pointer.
   while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
     scheduleNote( current16thNote, nextNoteTime, noteResolution );
     nextNote(tempo);
-    console.log(nextNoteTime)
   }
 }
 

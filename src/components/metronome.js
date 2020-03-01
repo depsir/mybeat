@@ -2,6 +2,7 @@ import React, { useEffect, useReducer, useState } from "react"
 import { getCurrentBar, init, play, scheduleNextClicks } from "../lib/clicker"
 import { GlobalHotKeys } from "react-hotkeys"
 import Bars from "./bars"
+import Stopwatch from "./stopwatch"
 
 const increase = (bpm=1) => ({
   type: "INCREASE",
@@ -16,10 +17,28 @@ const currentBar = () => {
   return Math.floor(getCurrentBar() / 4);    // for res  = 2
 }
 
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "INCREASE": return {...state, bpm: state.bpm + action.value}
+    case "DECREASE": return {...state, bpm: state.bpm - action.value}
+    default: return state;
+  }
+}
+const timeReducer = (state, action) => {
+  if (action.type === "RESET"){
+    return {start: state.start}
+  }
+  if (state.start) {
+   return {elapsed: (state.elapsed||0) + (new Date()).getTime() - state.start}
+  }
+  return {...state, start: (new Date()).getTime()}
+}
+
 const Metronome = () => {
-  const [started, setStarted] = useState(false)
+  const [started, setStarted] = useReducer((state) => !state, false)
   const [autoIncrement, setAutoIncrement] = useState(false)
-  const [bpm, setBpm] = useReducer((state, action) => action.type === "INCREASE" ? state + action.value : state - action.value,60)
+  const [{bpm}, setBpm] = useReducer(reducer,{bpm: 60})
+  const [time, setTime] = useReducer(timeReducer, {})
 
   const noteResolution = 2; // 0 == 16th, 1 == 8th, 2 == quarter note
 
@@ -47,12 +66,15 @@ const Metronome = () => {
     }
   }, [started, bpm])
 
-  const doStart = (v) => {
+  const doStart = () => {
     play()
-    setStarted(v)
+    setTime({type: !started ? "START" : "STOP"})
+    setStarted()
   }
-  const keyMap = { INCREASE: ["+", "shift++"], DECREASE: "-"}
-  const handlers = {INCREASE: () => setBpm(increase()), DECREASE: () => setBpm(decrease())}
+  const keyMap = { INCREASE: ["+", "shift++"], DECREASE: "-", START: {sequence: "space", action: "keydown"}}
+  const handlers = {INCREASE: () => setBpm(increase()), DECREASE: () => setBpm(decrease()), START: () => {
+      doStart(!started)
+    }}
 
 
   return <div style={{display: 'flex', flexDirection:"column", alignItems: "center"}}>
@@ -73,6 +95,9 @@ const Metronome = () => {
 
     <button onClick={() => doStart(!started)}>{started ? "stop" : "start"}</button>
     <button onClick={() => setAutoIncrement(!autoIncrement)}>{"autoIncrement"}</button>
+    <Stopwatch started={started} startTime={time.start}/>
+    <Stopwatch started={started} showWhenStopped={false} startTime={started ? time.start : 0} elapsed={time.elapsed}/>
+    <button onClick={() => setTime({type:"RESET"})}>reset</button>
   </div>
 }
 
