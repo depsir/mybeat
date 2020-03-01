@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useReducer } from "react"
-import { init, play, scheduler } from "../lib/clicker"
+import React, { useEffect, useReducer, useState } from "react"
+import { getCurrentBar, init, play, scheduleNextClicks } from "../lib/clicker"
 import { GlobalHotKeys } from "react-hotkeys"
+import Bars from "./bars"
 
 const increase = (bpm=1) => ({
   type: "INCREASE",
@@ -10,11 +11,17 @@ const decrease= (bpm=1) => ({
   type: "DECREASE",
   value: bpm
 })
+
+const currentBar = () => {
+  return Math.floor(getCurrentBar() / 4);    // for res  = 2
+}
+
 const Metronome = () => {
   const [started, setStarted] = useState(false)
   const [autoIncrement, setAutoIncrement] = useState(false)
   const [bpm, setBpm] = useReducer((state, action) => action.type === "INCREASE" ? state + action.value : state - action.value,60)
 
+  const noteResolution = 2; // 0 == 16th, 1 == 8th, 2 == quarter note
 
   useEffect(() => {
     init()
@@ -22,19 +29,19 @@ const Metronome = () => {
 
 
   useEffect(() => {
-    if (autoIncrement) {
-      let interval = setInterval(() => {
+    if (autoIncrement && started) {
+      const interval = setInterval(() => {
         setBpm(increase(2))
       }, 15 * 1000)
       return () => clearInterval(interval)
     }
-  }, [autoIncrement])
+  }, [autoIncrement, started])
 
   useEffect(() => {
     if (started) {
-      scheduler(bpm)
+      scheduleNextClicks(bpm, noteResolution)
       let interval = setInterval(() => {
-        scheduler(bpm)
+        scheduleNextClicks(bpm, noteResolution)
       }, 60 * 1000 / bpm / 10)
       return () => clearInterval(interval)
     }
@@ -54,11 +61,14 @@ const Metronome = () => {
       handlers={handlers}
     />
     <h3>My Beats</h3>
+    <Bars numberOfBars={4} started={started} getCurrentBar={currentBar}/>
 
     <div style={{marginBottom: "5px"}}>
+      <button onClick={() => setBpm(decrease(5))}>--</button>
       <button onClick={() => setBpm(decrease())}>-</button>
       <span style={{margin: "0 5px"}}>{bpm}</span>
       <button onClick={() => setBpm(increase())}>+</button>
+      <button onClick={() => setBpm(increase(5))}>++</button>
     </div>
 
     <button onClick={() => doStart(!started)}>{started ? "stop" : "start"}</button>

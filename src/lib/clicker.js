@@ -2,11 +2,10 @@ var audioContext = null;
 var current16thNote;        // What note is currently last scheduled?
 var scheduleAheadTime = 0.1;    // How far ahead to schedule audio (sec)
 var nextNoteTime = 0.0;     // when the next note is due.
-var noteResolution = 2;     // 0 == 16th, 1 == 8th, 2 == quarter note
 var noteLength = 0.05;      // length of "beep" (in seconds)
 var notesInQueue = [];      // the notes that have been put into the web audio,
 
-export function scheduleNote( beatNumber, time ) {
+export function scheduleNote( beatNumber, time, noteResolution ) {
   // push the note on the queue, even if we're not playing.
   notesInQueue.push( { note: beatNumber, time: time } );
 
@@ -29,6 +28,15 @@ export function scheduleNote( beatNumber, time ) {
   osc.stop( time + noteLength );
 }
 
+export function getCurrentBar(){
+  // todo: at some point should cleanup the queue, otherwise it will grow indefinitely
+  let l = notesInQueue.length;
+  while (l--) {
+    if (notesInQueue[l].time <= audioContext.currentTime) {
+      return notesInQueue[l].note;
+    }
+  }
+}
 
 export function nextNote(tempo) {
   // Advance current note and time by a 16th note...
@@ -44,13 +52,13 @@ export function nextNote(tempo) {
 }
 
 // call this periodically to schedule notes
-export function scheduler(tempo) {
+export function scheduleNextClicks(tempo, noteResolution) {
   console.log(`scheduling at ${tempo} bpm`)
 
   // while there are notes that will need to play before the next interval,
   // schedule them and advance the pointer.
   while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
-    scheduleNote( current16thNote, nextNoteTime );
+    scheduleNote( current16thNote, nextNoteTime, noteResolution );
     nextNote(tempo);
     console.log(nextNoteTime)
   }
