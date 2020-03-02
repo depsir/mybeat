@@ -71,29 +71,40 @@ const Metronome = () => {
     setTime({type: !started ? "START" : "STOP"})
     setStarted()
   }
-  const keyMap = { INCREASE: ["+", "shift++"], DECREASE: "-", START: {sequence: "space", action: "keydown"}}
-  const handlers = {INCREASE: () => setBpm(increase()), DECREASE: () => setBpm(decrease()), START: () => {
-      doStart(!started)
-    }}
+
+  const keyMap = {
+    UP_FIVE: "down",
+    DOWN_FIVE: "up",
+    INCREASE: ["+", "shift++"],
+    DECREASE: "-",
+    START: {sequence: "space", action: "keydown"}}
+  const handlers = {
+    UP_FIVE: () => setBpm(increase(5-bpm%5)),
+    DOWN_FIVE: () => setBpm(decrease(bpm%5 || 5)),
+    INCREASE: () => setBpm(increase()),
+    DECREASE: () => setBpm(decrease()),
+    START: () => { doStart(!started) }
+  }
 
 
   return <div style={{display: 'flex', flexDirection:"column", alignItems: "center"}}>
     <GlobalHotKeys
+      allowChanges
       keyMap={keyMap}
       handlers={handlers}
     />
-    <h3>My Beats</h3>
+    <h3>My Beat</h3>
     <Bars numberOfBars={4} started={started} getCurrentBar={currentBar}/>
 
     <div style={{marginBottom: "5px"}}>
-      <button onClick={() => setBpm(decrease(5))}>--</button>
-      <button onClick={() => setBpm(decrease())}>-</button>
+      <button onClick={handlers.DOWN_FIVE}>--</button>
+      <button onClick={handlers.DECREASE}>-</button>
       <span style={{margin: "0 5px"}}>{bpm}</span>
-      <button onClick={() => setBpm(increase())}>+</button>
-      <button onClick={() => setBpm(increase(5))}>++</button>
+      <button onClick={handlers.INCREASE}>+</button>
+      <button onClick={handlers.UP_FIVE}>++</button>
     </div>
 
-    <button onClick={() => doStart(!started)}>{started ? "stop" : "start"}</button>
+    <button onClick={handlers.START}>{started ? "stop" : "start"}</button>
     <button onClick={() => setAutoIncrement(!autoIncrement)}>{"autoIncrement"}</button>
     <Stopwatch started={started} startTime={time.start}/>
     <Stopwatch started={started} showWhenStopped={false} startTime={started ? time.start : 0} elapsed={time.elapsed}/>
