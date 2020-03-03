@@ -16,7 +16,7 @@ export default () => {
   keyMap={keyMap}
   handlers={handlers}
   />
-        {showHelp && <Help/>}
+        {<Help open={showHelp} onClose={() => setShowHelp(false)}/>}
             <Metronome/>
     </div>
 }

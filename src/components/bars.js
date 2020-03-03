@@ -3,13 +3,14 @@ import { makeStyles } from "@material-ui/styles"
 
 const styles = makeStyles({
   bar: {
-    width: '20px',
+    width: '30px',
     height: '10px',
     border: '1px solid black',
-    margin: '0 5px'
+    margin: '1px 5px',
   },
   current: {
-    backgroundColor: "#eee"
+    borderWidth: "2px",
+    margin: "0px 4px"
   }
 })
 
