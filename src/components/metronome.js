@@ -1,5 +1,14 @@
-import React, { useEffect, useReducer } from "react"
-import { getCurrentBar, init, play, scheduleNextClicks } from "../lib/clicker"
+import React, { useEffect, useReducer, useState } from "react"
+import {
+  configure,
+  getCurrentBar,
+  getCurrentNote,
+  getCurrentTempo,
+  incrementBpm,
+  init,
+  play,
+  scheduleNextClicks,
+} from "../lib/clicker"
 import { GlobalHotKeys } from "react-hotkeys"
 import Bars from "./bars"
 import Stopwatch from "./stopwatch"
@@ -26,27 +35,28 @@ const timeReducer = (state, action) => {
 
 const Metronome = () => {
   const [started, setStarted] = useReducer((state) => !state, false)
-  const [{bpm}, varyBpm] = useReducer((state, action) => {
-    const nextBpm = state.bpm + action;
-    return ({ ...state, bpm: Math.max(0, nextBpm) })
-  },{bpm: 60})
+  const [bpm, setBpm] =  useState(getCurrentTempo());
   const [time, setTime] = useReducer(timeReducer, {})
 
-  const noteResolution = 2; // 0 == 16th, 1 == 8th, 2 == quarter note
-
   useEffect(() => {
-    init()
+    init({noteResolution: 2}) // 0 == 16th, 1 == 8th, 2 == quarter note
   }, [])
 
   useEffect(() => {
     if (started) {
-      scheduleNextClicks(bpm, noteResolution)
-      let interval = setInterval(() => {
-        scheduleNextClicks(bpm, noteResolution)
-      }, 60 * 1000 / bpm / 10)
+      scheduleNextClicks()
+      const interval = setInterval(scheduleNextClicks, 20)
       return () => clearInterval(interval)
     }
-  }, [started, bpm])
+  }, [started])
+
+  useEffect(() => {
+    if (started) {
+      setBpm(getCurrentTempo())
+      const interval = setInterval( () => setBpm(getCurrentTempo()), 20)
+      return () => clearInterval(interval)
+    }
+  }, [started])
 
   const doStart = () => {
     play()
@@ -61,10 +71,10 @@ const Metronome = () => {
     DECREASE: "-",
     START: {sequence: "space", action: "keydown"}}
   const handlers = {
-    UP_FIVE: () => varyBpm(5-bpm%5),
-    DOWN_FIVE: () => varyBpm(- (bpm%5 || 5)),
-    INCREASE: () => varyBpm(1),
-    DECREASE: () => varyBpm(-1),
+    UP_FIVE: () => setBpm(incrementBpm(5-bpm%5)),
+    DOWN_FIVE: () => setBpm(incrementBpm(- (bpm%5 || 5))),
+    INCREASE: () => setBpm(incrementBpm(1)),
+    DECREASE: () => setBpm(incrementBpm(-1)),
     START: () => { doStart(!started) }
   }
 
@@ -88,7 +98,7 @@ const Metronome = () => {
     </div>
 
 
-    <AutoIncrement started={started} varyBpm={varyBpm}/>
+    <AutoIncrement started={started} varyBpm={incrementBpm} configure={({step, enabled, period, direction, mode}) => configure({  incrementEnabled: enabled, incrementMode: mode, incrementPeriod: period * 4, incrementDelta: step, incrementDirection: direction })}/>
     <Stopwatch started={started} startTime={time.start}/>
     <Stopwatch started={started} showWhenStopped={false} startTime={started ? time.start : 0} elapsed={time.elapsed}/>
     <button onClick={() => setTime({type:"RESET"})}>reset</button>
