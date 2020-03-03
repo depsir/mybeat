@@ -68,7 +68,6 @@ const Metronome = () => {
     START: () => { doStart(!started) }
   }
 
-
   return <div style={{display: 'flex', flexDirection:"column", alignItems: "center"}}>
     <GlobalHotKeys
       allowChanges

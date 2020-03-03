@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { makeStyles } from "@material-ui/styles"
 
-const styles = makeStyles({
+const styles = makeStyles(theme => ({
   bar: {
     width: '30px',
     height: '10px',
@@ -9,10 +9,11 @@ const styles = makeStyles({
     margin: '1px 5px',
   },
   current: {
+    borderColor: theme.palette.secondary.main,
     borderWidth: "2px",
     margin: "0px 4px"
   }
-})
+}))
 
 const Bars = ({numberOfBars, started, getCurrentBar}) => {
   const classes = styles();
