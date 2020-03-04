@@ -31,14 +31,16 @@ const AutoIncrement = ({ started, varyBpm, configure}) => {
       }, t(autoIncrement.period) * 1000)
       return () => clearInterval(interval)
     }
-  }, [autoIncrement.enabled, autoIncrement.step, autoIncrement.period, autoIncrement.direction, autoIncrement.mode, started])
+  }, [autoIncrement.enabled, autoIncrement.step, autoIncrement.period, autoIncrement.direction, autoIncrement.mode, started, varyBpm])
 
-  useEffect(() => {
-      setSteps(autoIncrement.step || 0)
-      setPeriod(autoIncrement.period || 0)
-      setEnabled(autoIncrement.enabled)
-      setDirection(autoIncrement.direction || 1)
-  }, [open])
+  function openDialog(){
+    setSteps(autoIncrement.step || 0)
+    setPeriod(autoIncrement.period || 0)
+    setEnabled(autoIncrement.enabled)
+    setDirection(autoIncrement.direction || 1)
+    setMode("time")
+    setIncrementDialogOpen(true)
+  }
 
   const handleClose = () => setIncrementDialogOpen(false)
   return <Row>
@@ -49,7 +51,7 @@ const AutoIncrement = ({ started, varyBpm, configure}) => {
               configure({step:t(autoIncrement.step), period:t(autoIncrement.period), direction:autoIncrement.direction, mode:autoIncrement.mode, enabled: e.target.checked })
 
             }}/>
-    <AutoIncrementSettingsIcon onClick={() => setIncrementDialogOpen(true)}/>
+    <AutoIncrementSettingsIcon onClick={openDialog}/>
     <Dialog open={open} onClose={handleClose}>
       <DialogTitle>
           <span>Auto Increment</span>
@@ -62,8 +64,8 @@ const AutoIncrement = ({ started, varyBpm, configure}) => {
             {direction > 0 ? <Grow color="primary" onClick={() => setDirection(-1)}/> : <Lower color="primary" onClick={() => setDirection(1)}/>}
             {mode === 'time' ? <TimeMode color="primary" onClick={() => setMode("beat")}/> : <BeatMode color="primary" onClick={() => setMode('time')}/>}
           </Row>
-          <Slider type="range" value={period} min={0} max={25} onChange={(e, v) => setPeriod(v)}/>
           <Slider value={step} min={0} max={25} onChange={(e, v) => setSteps(v)}/>
+          <Slider type="range" value={period} min={0} max={25} onChange={(e, v) => setPeriod(v)}/>
         </Col>
       </DialogContent>
       <DialogActions>

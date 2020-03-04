@@ -27,7 +27,7 @@ const Bars = ({numberOfBars, started, getCurrentBar}) => {
       }, 50)
       return () => clearInterval(interval)
     }
-  }, [numberOfBars, started])
+  }, [numberOfBars, started, getCurrentBar])
 
 
   return <div style={{display: 'flex'}}>

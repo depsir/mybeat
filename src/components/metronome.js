@@ -2,7 +2,6 @@ import React, { useEffect, useReducer, useState } from "react"
 import {
   configure,
   getCurrentBar,
-  getCurrentNote,
   getCurrentTempo,
   incrementBpm,
   init,

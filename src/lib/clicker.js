@@ -18,7 +18,6 @@ const config = {
 
 export function configure(c){
   Object.keys(c).forEach(k => config[k] = c[k])
-  console.log(config)
 }
 
 export function incrementBpm(delta){
@@ -26,9 +25,7 @@ export function incrementBpm(delta){
   return getCurrentTempo()
 }
 
-export function scheduleNote( beatNumber, time, noteResolution, tempo, currentNote ) {
-  // push the note on the queue, even if we're not playing.
-  notesInQueue.push( { note: beatNumber, time, tempo, currentNote } );
+export function scheduleNote( beatNumber, time, noteResolution ) {
 
   if ( (noteResolution===1) && (beatNumber%2))
     return; // we're not playing non-8th 16th notes
@@ -36,7 +33,7 @@ export function scheduleNote( beatNumber, time, noteResolution, tempo, currentNo
     return; // we're not playing non-quarter 8th notes
 
   // create an oscillator
-  var osc = audioContext.createOscillator();
+  const osc = audioContext.createOscillator();
   osc.connect( audioContext.destination );
   if (beatNumber % 16 === 0)    // beat 0 == high pitch
     osc.frequency.value = 880.0;
@@ -99,6 +96,8 @@ export function scheduleNextClicks() {
   // schedule them and advance the pointer.
   while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
     incrementTempo()
+    // push the note on the queue, even if we're not playing.
+    notesInQueue.push( { note: current16thNote, nextNoteTime, tempo: config.tempo, currentNote } );
     scheduleNote( current16thNote, nextNoteTime, config.noteResolution, config.tempo, currentNote);
     nextNote(config.tempo);
   }
@@ -115,11 +114,6 @@ export function play() {
 
 // call this as soon as
 export function init(c){
-
-  // NOTE: THIS RELIES ON THE MONKEYPATCH LIBRARY BEING LOADED FROM
-  // Http://cwilso.github.io/AudioContext-MonkeyPatch/AudioContextMonkeyPatch.js
-  // TO WORK ON CURRENT CHROME!!  But this means our code can be properly
-  // spec-compliant, and work on Chrome, Safari and Firefox.
   audioContext = new AudioContext();
   configure(c)
 }
