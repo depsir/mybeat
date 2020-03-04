@@ -97,7 +97,7 @@ export function scheduleNextClicks() {
   while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
     incrementTempo()
     // push the note on the queue, even if we're not playing.
-    notesInQueue.push( { note: current16thNote, nextNoteTime, tempo: config.tempo, currentNote } );
+    notesInQueue.push( { note: current16thNote, time: nextNoteTime, tempo: config.tempo, currentNote } );
     scheduleNote( current16thNote, nextNoteTime, config.noteResolution, config.tempo, currentNote);
     nextNote(config.tempo);
   }
