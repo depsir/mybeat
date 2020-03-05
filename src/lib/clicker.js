@@ -1,4 +1,4 @@
-import { INCREMENT } from "./domain"
+import { INCREMENT, INCREMENT_UNIT } from "./domain"
 
 let audioContext = null
 let current16thNote         // What note is currently last scheduled?
@@ -12,19 +12,23 @@ const config = {
   tempo: 60,
   noteResolution: 1,
   incrementEnabled: false,
-  incrementMode: "beat",
+  incrementMode: INCREMENT.BEAT,
   incrementPeriod: 16,
   incrementDelta:4,
   incrementDirection: 1,
-  lastIncrementTime: 0
+  lastIncrementTime: 0,
+  incrementUnit: INCREMENT_UNIT.BPM
 }
 
 export function configure(c){
   Object.keys(c).forEach(k => config[k] = c[k])
 }
 
-export function incrementBpm(delta){
-  config.tempo = Math.max(config.tempo + delta, 0);
+export function incrementBpm(delta, round=true){
+  const tempo = Math.max(config.tempo + delta, 0)
+  const factor = round ? 1 : 10;
+
+  config.tempo = Math.round(tempo*factor)/factor;
   return getCurrentTempo()
 }
 
@@ -88,17 +92,22 @@ export function nextNote(tempo) {
 function incrementTempo(){
   if (!config.incrementEnabled) return
 
+  const isPercent = config.incrementUnit === INCREMENT_UNIT.PERCENT
+  const factor = isPercent ? config.tempo/100  : 1
+  const delta = config.incrementDirection * factor * config.incrementDelta
+  console.log(factor, delta)
+
   if (config.incrementMode === INCREMENT.BEAT) {
     const period = config.incrementPeriod * 4
     if (currentNote > 0 && currentNote % period === 0) {
-      incrementBpm(config.incrementDirection * config.incrementDelta)
+      incrementBpm(delta, !isPercent)
     }
   }
 
   if (config.incrementMode === INCREMENT.TIME) {
     if (nextNoteTime >= config.lastIncrementTime + config.incrementPeriod) {
       config.lastIncrementTime = nextNoteTime;
-      incrementBpm(config.incrementDirection * config.incrementDelta)
+      incrementBpm(delta, !isPercent)
     }
   }
 }

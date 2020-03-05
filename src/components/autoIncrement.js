@@ -14,16 +14,17 @@ import Grow from "@material-ui/icons/TrendingUp"
 import Lower from "@material-ui/icons/TrendingDown"
 import Col from "./col"
 import Slider from "@material-ui/core/Slider"
-import { INCREMENT } from "../lib/domain"
+import { INCREMENT, INCREMENT_UNIT } from "../lib/domain"
 
 const AutoIncrement = ({configure}) => {
-  const [autoIncrement, setAutoIncrement] = useState({enabled: false, direction: 1, step:0, period:0, mode: INCREMENT.TIME});
+  const [autoIncrement, setAutoIncrement] = useState({enabled: false, direction: 1, step:0, period:0, mode: INCREMENT.TIME, unit: INCREMENT_UNIT.BPM});
   const [step, setSteps] = useState(0)
   const [period, setPeriod] = useState(0)
   const [enabled, setEnabled] = useState(false)
   const [direction, setDirection] = useState(1)
   const [open, setIncrementDialogOpen] = useState(false);
   const [mode, setMode] = useState(INCREMENT.TIME)
+  const [unit, setUnit] = useState(INCREMENT_UNIT.BPM)
 
   function openDialog(){
     setSteps(autoIncrement.step || 0)
@@ -40,7 +41,7 @@ const AutoIncrement = ({configure}) => {
     <Switch checked={autoIncrement.enabled}
             onChange={(e) => {
               setAutoIncrement({ ...autoIncrement, enabled: e.target.checked })
-              configure({step:t(autoIncrement.step), period:t(autoIncrement.period), direction:autoIncrement.direction, mode:autoIncrement.mode, enabled: e.target.checked })
+              configure({step:t(autoIncrement.step), period:t(autoIncrement.period), direction:autoIncrement.direction, mode:autoIncrement.mode, enabled: e.target.checked, unit: autoIncrement.unit })
 
             }}/>
     <AutoIncrementSettingsIcon onClick={openDialog}/>
@@ -51,9 +52,10 @@ const AutoIncrement = ({configure}) => {
       </DialogTitle>
       <DialogContent>
         <Col>
-          <div style={{minWidth:"230px", textAlign: "center"}}>{`${direction > 0 ? "Increase" : 'Decrease'} ${t(step)} bpm every ${t(period)} ${mode === INCREMENT.TIME ? "seconds" : "beats"}`}</div>
+          <div style={{minWidth:"230px", textAlign: "center"}}>{`${direction > 0 ? "Increase" : 'Decrease'} ${t(step)} ${unit} every ${t(period)} ${mode === INCREMENT.TIME ? "seconds" : "beats"}`}</div>
           <Row>
             {direction > 0 ? <Grow color="primary" onClick={() => setDirection(-1)}/> : <Lower color="primary" onClick={() => setDirection(1)}/>}
+            {unit === INCREMENT_UNIT.BPM ? <span onClick={()=>setUnit(INCREMENT_UNIT.PERCENT)}>b</span>:<span onClick={()=>setUnit(INCREMENT_UNIT.BPM)}>%</span>}
             {mode === INCREMENT.TIME ? <TimeMode color="primary" onClick={() => setMode(INCREMENT.BEAT)}/> : <BeatMode color="primary" onClick={() => setMode(INCREMENT.TIME)}/>}
           </Row>
           <Slider value={step} min={0} max={25} onChange={(e, v) => setSteps(v)}/>
@@ -64,8 +66,8 @@ const AutoIncrement = ({configure}) => {
         <Button variant="contained" color="secondary" onClick={handleClose}>Cancel</Button>
         <Button variant="contained" color="primary" onClick={() => {
           setIncrementDialogOpen(false)
-          setAutoIncrement({step, enabled, period, direction, mode})
-          configure({step:t(step), enabled, period:t(period), direction, mode})
+          setAutoIncrement({step, enabled, period, direction, mode, unit})
+          configure({step:t(step), enabled, period:t(period), direction, mode, unit})
         }}>Ok</Button>
       </DialogActions>
 
