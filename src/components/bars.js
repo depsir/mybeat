@@ -18,7 +18,7 @@ const styles = makeStyles(theme => ({
 const Bars = ({numberOfBars, started, getCurrentBar}) => {
   const classes = styles();
   const bars = Array(numberOfBars).fill(0)
-  const [currentBar, setCurrentBar] = useState()
+  const [currentBar, setCurrentBar] = useState(0)
 
   useEffect(() => {
     if (started){
@@ -27,6 +27,7 @@ const Bars = ({numberOfBars, started, getCurrentBar}) => {
       }, 50)
       return () => clearInterval(interval)
     }
+    setCurrentBar(0)
   }, [numberOfBars, started, getCurrentBar])
 
 
