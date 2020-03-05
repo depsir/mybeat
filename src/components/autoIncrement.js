@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import Dialog from "@material-ui/core/Dialog"
 import Button from "@material-ui/core/Button"
 import DialogActions from "@material-ui/core/DialogActions"
@@ -14,31 +14,23 @@ import Grow from "@material-ui/icons/TrendingUp"
 import Lower from "@material-ui/icons/TrendingDown"
 import Col from "./col"
 import Slider from "@material-ui/core/Slider"
+import { INCREMENT } from "../lib/domain"
 
-const AutoIncrement = ({ started, varyBpm, configure}) => {
-  const [autoIncrement, setAutoIncrement] = useState({enabled: false, direction: 1, step:0, period:0, mode: "time"});
+const AutoIncrement = ({configure}) => {
+  const [autoIncrement, setAutoIncrement] = useState({enabled: false, direction: 1, step:0, period:0, mode: INCREMENT.TIME});
   const [step, setSteps] = useState(0)
   const [period, setPeriod] = useState(0)
   const [enabled, setEnabled] = useState(false)
   const [direction, setDirection] = useState(1)
   const [open, setIncrementDialogOpen] = useState(false);
-  const [mode, setMode] = useState("time")
-
-  useEffect(() => {
-    if (autoIncrement.enabled && started && autoIncrement.mode === "time") {
-      const interval = setInterval(() => {
-        varyBpm(autoIncrement.direction * t(autoIncrement.step))
-      }, t(autoIncrement.period) * 1000)
-      return () => clearInterval(interval)
-    }
-  }, [autoIncrement.enabled, autoIncrement.step, autoIncrement.period, autoIncrement.direction, autoIncrement.mode, started, varyBpm])
+  const [mode, setMode] = useState(INCREMENT.TIME)
 
   function openDialog(){
     setSteps(autoIncrement.step || 0)
     setPeriod(autoIncrement.period || 0)
     setEnabled(autoIncrement.enabled)
     setDirection(autoIncrement.direction || 1)
-    setMode("time")
+    setMode(INCREMENT.TIME)
     setIncrementDialogOpen(true)
   }
 
@@ -59,10 +51,10 @@ const AutoIncrement = ({ started, varyBpm, configure}) => {
       </DialogTitle>
       <DialogContent>
         <Col>
-          <div style={{minWidth:"230px", textAlign: "center"}}>{`${direction > 0 ? "Increase" : 'Decrease'} ${t(step)} bpm every ${t(period)} ${mode === "time" ? "seconds" : "beats"}`}</div>
+          <div style={{minWidth:"230px", textAlign: "center"}}>{`${direction > 0 ? "Increase" : 'Decrease'} ${t(step)} bpm every ${t(period)} ${mode === INCREMENT.TIME ? "seconds" : "beats"}`}</div>
           <Row>
             {direction > 0 ? <Grow color="primary" onClick={() => setDirection(-1)}/> : <Lower color="primary" onClick={() => setDirection(1)}/>}
-            {mode === 'time' ? <TimeMode color="primary" onClick={() => setMode("beat")}/> : <BeatMode color="primary" onClick={() => setMode('time')}/>}
+            {mode === INCREMENT.TIME ? <TimeMode color="primary" onClick={() => setMode(INCREMENT.BEAT)}/> : <BeatMode color="primary" onClick={() => setMode(INCREMENT.TIME)}/>}
           </Row>
           <Slider value={step} min={0} max={25} onChange={(e, v) => setSteps(v)}/>
           <Slider type="range" value={period} min={0} max={25} onChange={(e, v) => setPeriod(v)}/>

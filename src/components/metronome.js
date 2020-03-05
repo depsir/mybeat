@@ -77,6 +77,15 @@ const Metronome = () => {
     START: () => { doStart(!started) }
   }
 
+  const mapConfigure = ({step, enabled, period, direction, mode}) => {
+    configure({
+      incrementEnabled: enabled,
+      incrementMode: mode,
+      incrementPeriod: period,
+      incrementDelta: step,
+      incrementDirection: direction,
+    })
+  }
   return <div style={{display: 'flex', flexDirection:"column", alignItems: "center"}}>
     <GlobalHotKeys
       allowChanges
@@ -97,7 +106,7 @@ const Metronome = () => {
     </div>
 
 
-    <AutoIncrement started={started} varyBpm={incrementBpm} configure={({step, enabled, period, direction, mode}) => configure({  incrementEnabled: enabled, incrementMode: mode, incrementPeriod: period * 4, incrementDelta: step, incrementDirection: direction })}/>
+    <AutoIncrement started={started} varyBpm={incrementBpm} configure={mapConfigure}/>
     <Stopwatch started={started} startTime={time.start}/>
     <Stopwatch started={started} showWhenStopped={false} startTime={started ? time.start : 0} elapsed={time.elapsed}/>
     <button onClick={() => setTime({type:"RESET"})}>reset</button>

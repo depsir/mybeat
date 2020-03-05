@@ -1,9 +1,11 @@
-var audioContext = null;
-var current16thNote;        // What note is currently last scheduled?
-var scheduleAheadTime = 0.1;    // How far ahead to schedule audio (sec)
-var nextNoteTime = 0.0;     // when the next note is due.
-var noteLength = 0.05;      // length of "beep" (in seconds)
-var notesInQueue = [];      // the notes that have been put into the web audio,
+import { INCREMENT } from "./domain"
+
+let audioContext = null
+let current16thNote         // What note is currently last scheduled?
+let scheduleAheadTime = 0.1    // How far ahead to schedule audio (sec)
+let nextNoteTime = 0.0;     // when the next note is due.
+let noteLength = 0.05;      // length of "beep" (in seconds)
+let notesInQueue = [];      // the notes that have been put into the web audio,
 let currentNote
 
 const config = {
@@ -13,7 +15,8 @@ const config = {
   incrementMode: "beat",
   incrementPeriod: 16,
   incrementDelta:4,
-  incrementDirection: 1
+  incrementDirection: 1,
+  lastIncrementTime: 0
 }
 
 export function configure(c){
@@ -83,8 +86,18 @@ export function nextNote(tempo) {
 }
 
 function incrementTempo(){
-  if (config.incrementEnabled && config.incrementMode === "beat"){
-    if (currentNote > 0 && currentNote % config.incrementPeriod === 0){
+  if (!config.incrementEnabled) return
+
+  if (config.incrementMode === INCREMENT.BEAT) {
+    const period = config.incrementPeriod * 4
+    if (currentNote > 0 && currentNote % period === 0) {
+      incrementBpm(config.incrementDirection * config.incrementDelta)
+    }
+  }
+
+  if (config.incrementMode === INCREMENT.TIME) {
+    if (nextNoteTime >= config.lastIncrementTime + config.incrementPeriod) {
+      config.lastIncrementTime = nextNoteTime;
       incrementBpm(config.incrementDirection * config.incrementDelta)
     }
   }
@@ -103,13 +116,13 @@ export function scheduleNextClicks() {
   }
 }
 
-
 // call this to initialize the metronome
 export function play() {
   notesInQueue = []
   currentNote = 0
   current16thNote = 0;
   nextNoteTime = audioContext.currentTime;
+  config.lastIncrementTime = audioContext.currentTime;
 }
 
 // call this as soon as
