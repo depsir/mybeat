@@ -32,13 +32,15 @@ const timeReducer = (state, action) => {
   return {...state, start: (new Date()).getTime()}
 }
 
+const beatsPerMeasure = 4;
+
 const Metronome = () => {
   const [started, setStarted] = useReducer((state) => !state, false)
   const [bpm, setBpm] =  useState(getCurrentTempo());
   const [time, setTime] = useReducer(timeReducer, {})
 
   useEffect(() => {
-    init({noteResolution: 2}) // 0 == 16th, 1 == 8th, 2 == quarter note
+    init({noteResolution: 2, beatsPerMeasure: 4}) // 0 == 16th, 1 == 8th, 2 == quarter note
   }, [])
 
   useEffect(() => {
@@ -94,7 +96,7 @@ const Metronome = () => {
       handlers={handlers}
     />
     <h3>My Beat</h3>
-    <Bars numberOfBars={4} started={started} getCurrentBar={currentBar}/>
+    <Bars numberOfBars={beatsPerMeasure} started={started} getCurrentBar={currentBar}/>
 
     { started ? <Stop onClick={handlers.START} /> : <PlayCircleOutline onClick={handlers.START} />}
 
@@ -107,7 +109,7 @@ const Metronome = () => {
     </div>
 
 
-    <AutoIncrement started={started} varyBpm={incrementBpm} configure={mapConfigure}/>
+    <AutoIncrement started={started} configure={mapConfigure}/>
     <Stopwatch started={started} startTime={time.start}/>
     <Stopwatch started={started} showWhenStopped={false} startTime={started ? time.start : 0} elapsed={time.elapsed}/>
     <button onClick={() => setTime({type:"RESET"})}>reset</button>

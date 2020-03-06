@@ -31,7 +31,8 @@ const AutoIncrement = ({configure}) => {
     setPeriod(autoIncrement.period || 0)
     setEnabled(autoIncrement.enabled)
     setDirection(autoIncrement.direction || 1)
-    setMode(INCREMENT.TIME)
+    setMode(autoIncrement.mode)
+    setUnit(autoIncrement.unit)
     setIncrementDialogOpen(true)
   }
 
@@ -52,7 +53,7 @@ const AutoIncrement = ({configure}) => {
       </DialogTitle>
       <DialogContent>
         <Col>
-          <div style={{minWidth:"230px", textAlign: "center"}}>{`${direction > 0 ? "Increase" : 'Decrease'} ${t(step)} ${unit} every ${t(period)} ${mode === INCREMENT.TIME ? "seconds" : "beats"}`}</div>
+          <div style={{minWidth:"230px", textAlign: "center"}}>{`${direction > 0 ? "Increase" : 'Decrease'} ${t(step)} ${unit} every ${t(period)} ${mode === INCREMENT.TIME ? "seconds" : "measures"}`}</div>
           <Row>
             {direction > 0 ? <Grow color="primary" onClick={() => setDirection(-1)}/> : <Lower color="primary" onClick={() => setDirection(1)}/>}
             {unit === INCREMENT_UNIT.BPM ? <span onClick={()=>setUnit(INCREMENT_UNIT.PERCENT)}>b</span>:<span onClick={()=>setUnit(INCREMENT_UNIT.BPM)}>%</span>}

@@ -11,6 +11,7 @@ let currentNote
 const config = {
   tempo: 60,
   noteResolution: 1,
+  beatsPerMeasure: 4,
   incrementEnabled: false,
   incrementMode: INCREMENT.BEAT,
   incrementPeriod: 16,
@@ -98,7 +99,7 @@ function incrementTempo(){
   console.log(factor, delta)
 
   if (config.incrementMode === INCREMENT.BEAT) {
-    const period = config.incrementPeriod * 4
+    const period = config.incrementPeriod * 4 * config.beatsPerMeasure;
     if (currentNote > 0 && currentNote % period === 0) {
       incrementBpm(delta, !isPercent)
     }
