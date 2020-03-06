@@ -9,9 +9,9 @@ const useStyles = makeStyles({
   }
 })
 
-const Row = ({children}) => {
+const Row = ({children, className=""}) => {
   const classes = useStyles()
-  return <div className={classes.row}>
+  return <div className={classes.row + " " + className}>
     {children}
   </div>
 }

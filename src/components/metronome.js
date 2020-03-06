@@ -79,14 +79,10 @@ const Metronome = () => {
     START: () => { doStart(!started) }
   }
 
-  const mapConfigure = ({step, enabled, period, direction, mode, unit}) => {
+  const mapConfigure = ({ enabled, auto}) => {
     configure({
       incrementEnabled: enabled,
-      incrementMode: mode,
-      incrementPeriod: period,
-      incrementDelta: step,
-      incrementDirection: direction,
-      incrementUnit: unit,
+      increment: auto
     })
   }
   return <div style={{display: 'flex', flexDirection:"column", alignItems: "center"}}>

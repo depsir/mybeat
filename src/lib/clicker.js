@@ -13,12 +13,16 @@ const config = {
   noteResolution: 1,
   beatsPerMeasure: 4,
   incrementEnabled: false,
-  incrementMode: INCREMENT.BEAT,
-  incrementPeriod: 16,
-  incrementDelta:4,
-  incrementDirection: 1,
+  increment: [{
+    mode: INCREMENT.BEAT,
+    period: 16,
+    delta:4,
+    direction: 1,
+    unit: INCREMENT_UNIT.BPM
+  }],
   lastIncrementTime: 0,
-  incrementUnit: INCREMENT_UNIT.BPM
+  lastIncrementBeat: 0,
+  lastIncrementConfigIndex: 0
 }
 
 export function configure(c){
@@ -92,24 +96,34 @@ export function nextNote(tempo) {
 
 function incrementTempo(){
   if (!config.incrementEnabled) return
+  
+  const incrementConfig = config.increment[config.lastIncrementConfigIndex]
 
-  const isPercent = config.incrementUnit === INCREMENT_UNIT.PERCENT
+  const isPercent = incrementConfig.unit === INCREMENT_UNIT.PERCENT
   const factor = isPercent ? config.tempo/100  : 1
-  const delta = config.incrementDirection * factor * config.incrementDelta
-  console.log(factor, delta)
+  const delta = incrementConfig.direction * factor * incrementConfig.delta
 
-  if (config.incrementMode === INCREMENT.BEAT) {
-    const period = config.incrementPeriod * 4 * config.beatsPerMeasure;
-    if (currentNote > 0 && currentNote % period === 0) {
-      incrementBpm(delta, !isPercent)
+  let shouldIncrement = false;
+
+  if (incrementConfig.mode === INCREMENT.BEAT) {
+    const period = incrementConfig.period * 4 * config.beatsPerMeasure;
+    if (currentNote > 0 && (currentNote - config.lastIncrementBeat) % period === 0) {
+      shouldIncrement = true;
     }
   }
 
-  if (config.incrementMode === INCREMENT.TIME) {
-    if (nextNoteTime >= config.lastIncrementTime + config.incrementPeriod) {
-      config.lastIncrementTime = nextNoteTime;
-      incrementBpm(delta, !isPercent)
+  if (incrementConfig.mode === INCREMENT.TIME) {
+    console.log(nextNoteTime, config.lastIncrementTime, incrementConfig.period)
+    if (nextNoteTime >= config.lastIncrementTime + incrementConfig.period) {
+      shouldIncrement = true;
     }
+  }
+
+  if (shouldIncrement){
+    config.lastIncrementTime = nextNoteTime;
+    config.lastIncrementBeat = currentNote
+    incrementBpm(delta, !isPercent)
+    config.lastIncrementConfigIndex = (config.lastIncrementConfigIndex + 1) % config.increment.length
   }
 }
 
@@ -133,6 +147,8 @@ export function play() {
   current16thNote = 0;
   nextNoteTime = audioContext.currentTime;
   config.lastIncrementTime = audioContext.currentTime;
+  config.lastIncrementConfigIndex = 0
+  config.lastIncrementBeat = 0
 }
 
 // call this as soon as
