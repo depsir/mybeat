@@ -19,7 +19,7 @@ import ChevronLeft from "@material-ui/icons/ChevronLeft"
 import AutoIncrement from "./autoIncrement"
 
 const currentBar = () => {
-  return Math.floor(getCurrentBar() / 4);    // for res  = 2
+  return Math.floor(getCurrentBar());    // for res  = 2
 }
 
 const timeReducer = (state, action) => {
@@ -32,15 +32,17 @@ const timeReducer = (state, action) => {
   return {...state, start: (new Date()).getTime()}
 }
 
-const beatsPerMeasure = 4;
+const getBeat = (f) => ({frequency: f})
 
 const Metronome = () => {
   const [started, setStarted] = useReducer((state) => !state, false)
   const [bpm, setBpm] =  useState(getCurrentTempo());
   const [time, setTime] = useReducer(timeReducer, {})
+  const [beatsPerMeasure, setBeatsPerMeasure] = useState(4)
+  const [beats, setBeats] = useState([getBeat(880), getBeat(440),getBeat(440),getBeat(440)])
 
   useEffect(() => {
-    init({noteResolution: 2, beatsPerMeasure: 4}) // 0 == 16th, 1 == 8th, 2 == quarter note
+    init({ beatsPerMeasure, beats})
   }, [])
 
   useEffect(() => {

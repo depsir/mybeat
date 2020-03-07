@@ -10,8 +10,8 @@ let currentNote
 
 const config = {
   tempo: 60,
-  noteResolution: 1,
   beatsPerMeasure: 4,
+  beats: [{frequency: 440}],
   incrementEnabled: false,
   increment: [{
     mode: INCREMENT.BEAT,
@@ -37,22 +37,14 @@ export function incrementBpm(delta, round=true){
   return getCurrentTempo()
 }
 
-export function scheduleNote( beatNumber, time, noteResolution ) {
+export function scheduleNote( beatNumber, time) {
 
-  if ( (noteResolution===1) && (beatNumber%2))
-    return; // we're not playing non-8th 16th notes
-  if ( (noteResolution===2) && (beatNumber%4))
-    return; // we're not playing non-quarter 8th notes
+  const beat = config.beats[beatNumber % config.beatsPerMeasure]
 
   // create an oscillator
-  const osc = audioContext.createOscillator();
+    const osc = audioContext.createOscillator();
   osc.connect( audioContext.destination );
-  if (beatNumber % 16 === 0)    // beat 0 == high pitch
-    osc.frequency.value = 880.0;
-  else if (beatNumber % 4 === 0 )    // quarter notes = medium pitch
-    osc.frequency.value = 440.0;
-  else                        // other 16th notes = low pitch
-    osc.frequency.value = 220.0;
+  osc.frequency.value = beat.frequency;
 
   osc.start( time );
   osc.stop( time + noteLength );
@@ -84,12 +76,12 @@ export function nextNote(tempo) {
   // Advance current note and time by a 16th note...
   const secondsPerBeat = 60.0 / (tempo );    // Notice this picks up the CURRENT
                                         // tempo value to calculate beat length.
-  nextNoteTime += 0.25 * secondsPerBeat;    // Add beat length to last beat time
+  nextNoteTime += secondsPerBeat;    // Add beat length to last beat time
 
 
   current16thNote++;    // Advance the beat number, wrap to zero
   currentNote++
-  if (current16thNote === 16) {
+  if (current16thNote === 4) {
     current16thNote = 0;
   }
 }
@@ -135,7 +127,7 @@ export function scheduleNextClicks() {
     incrementTempo()
     // push the note on the queue, even if we're not playing.
     notesInQueue.push( { note: current16thNote, time: nextNoteTime, tempo: config.tempo, currentNote } );
-    scheduleNote( current16thNote, nextNoteTime, config.noteResolution, config.tempo, currentNote);
+    scheduleNote( current16thNote, nextNoteTime, config.tempo, currentNote);
     nextNote(config.tempo);
   }
 }
