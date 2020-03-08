@@ -49,9 +49,13 @@ export function scheduleNote( beatNumber, time) {
   const beat = config.beats[beatNumber % config.beatsPerMeasure]
 
   // create an oscillator
-    const osc = audioContext.createOscillator();
-  osc.connect( audioContext.destination );
+  const osc = audioContext.createOscillator();
+  const gain = audioContext.createGain()
+  osc.connect(gain);
+  gain.connect( audioContext.destination );
+
   osc.frequency.value = beat.frequency;
+  gain.gain.value = beat.volume || 1
 
   osc.start( time );
   osc.stop( time + noteLength );
