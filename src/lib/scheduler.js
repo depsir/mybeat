@@ -83,7 +83,7 @@ function incrementTempo(){
   let shouldIncrement = false;
 
   if (incrementConfig.mode === INCREMENT.BEAT) {
-    const period = incrementConfig.period * 4 * config.beatsPerMeasure;
+    const period = incrementConfig.period * config.beatsPerMeasure;
     if (currentNote > 0 && (currentNote - config.lastIncrementBeat) % period === 0) {
       shouldIncrement = true;
     }
