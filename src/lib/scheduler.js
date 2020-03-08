@@ -1,11 +1,11 @@
 import { INCREMENT, INCREMENT_UNIT } from "./domain"
+import { queue } from "./nodeQueue"
+import { audioContext, initAudioContext } from "./audioContext"
 
-let audioContext = null
 let current16thNote         // What note is currently last scheduled?
 let scheduleAheadTime = 0.1    // How far ahead to schedule audio (sec)
 let nextNoteTime = 0.0;     // when the next note is due.
 let noteLength = 0.05;      // length of "beep" (in seconds)
-let notesInQueue = [];      // the notes that have been put into the web audio,
 let currentNote
 
 const config = {
@@ -25,16 +25,23 @@ const config = {
   lastIncrementConfigIndex: 0
 }
 
+export function getConfig(){
+  return config;
+}
+
 export function configure(c){
   Object.keys(c).forEach(k => config[k] = c[k])
 }
 
-export function incrementBpm(delta, round=true){
+export function incrementBpm(delta, round=true, other){
   const tempo = Math.max(config.tempo + delta, 0)
   const factor = round ? 1 : 10;
 
-  config.tempo = Math.round(tempo*factor)/factor;
-  return getCurrentTempo()
+  const tempo1 = Math.round(tempo*factor)/factor
+  const roundFun = delta > 0 ? Math.ceil : Math.floor;
+  const rounded = other ? roundFun(tempo1/other)*other : tempo1;
+
+  config.tempo = rounded;
 }
 
 export function scheduleNote( beatNumber, time) {
@@ -48,28 +55,6 @@ export function scheduleNote( beatNumber, time) {
 
   osc.start( time );
   osc.stop( time + noteLength );
-}
-
-export function getCurrentTempo(){
-  const currentNote = getCurrentNote();
-  if (currentNote){
-    return currentNote.tempo
-  }
-  return config.tempo;
-}
-
-export function getCurrentNote() {
-  let l = notesInQueue.length
-  while (l--) {
-    if (notesInQueue[l].time <= audioContext.currentTime) {
-      return notesInQueue[l]
-    }
-  }
-}
-
-export function getCurrentBar(){
-  // todo: at some point should cleanup the queue, otherwise it will grow indefinitely
-  return getCurrentNote().note
 }
 
 export function nextNote(tempo) {
@@ -105,7 +90,6 @@ function incrementTempo(){
   }
 
   if (incrementConfig.mode === INCREMENT.TIME) {
-    console.log(nextNoteTime, config.lastIncrementTime, incrementConfig.period)
     if (nextNoteTime >= config.lastIncrementTime + incrementConfig.period) {
       shouldIncrement = true;
     }
@@ -126,7 +110,7 @@ export function scheduleNextClicks() {
   while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
     incrementTempo()
     // push the note on the queue, even if we're not playing.
-    notesInQueue.push( { note: current16thNote, time: nextNoteTime, tempo: config.tempo, currentNote } );
+    queue.push( { note: current16thNote, time: nextNoteTime, tempo: config.tempo, currentNote } );
     scheduleNote( current16thNote, nextNoteTime, config.tempo, currentNote);
     nextNote(config.tempo);
   }
@@ -134,7 +118,7 @@ export function scheduleNextClicks() {
 
 // call this to initialize the metronome
 export function play() {
-  notesInQueue = []
+  queue.reset();
   currentNote = 0
   current16thNote = 0;
   nextNoteTime = audioContext.currentTime;
@@ -145,7 +129,7 @@ export function play() {
 
 // call this as soon as
 export function init(c){
-  audioContext = new AudioContext();
+  initAudioContext()
   configure(c)
 }
 

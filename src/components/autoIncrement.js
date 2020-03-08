@@ -1,4 +1,4 @@
-import React, { useReducer, useState } from "react"
+import React, { useState } from "react"
 import Dialog from "@material-ui/core/Dialog"
 import Button from "@material-ui/core/Button"
 import DialogActions from "@material-ui/core/DialogActions"

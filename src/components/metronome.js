@@ -1,13 +1,5 @@
 import React, { useEffect, useReducer, useState } from "react"
-import {
-  configure,
-  getCurrentBar,
-  getCurrentTempo,
-  incrementBpm,
-  init,
-  play,
-  scheduleNextClicks,
-} from "../lib/clicker"
+import { configure, incrementBpm, init, play, scheduleNextClicks } from "../lib/scheduler"
 import { GlobalHotKeys } from "react-hotkeys"
 import Bars from "./bars"
 import Stopwatch from "./stopwatch"
@@ -17,6 +9,8 @@ import DoubleArrow from "@material-ui/icons/DoubleArrow"
 import ChevronRight from "@material-ui/icons/ChevronRight"
 import ChevronLeft from "@material-ui/icons/ChevronLeft"
 import AutoIncrement from "./autoIncrement"
+import { getCurrentBar } from "../lib/nodeQueue"
+import CurrentBpm from "./currentBpm"
 
 const currentBar = () => {
   return Math.floor(getCurrentBar());    // for res  = 2
@@ -36,14 +30,14 @@ const getBeat = (f) => ({frequency: f})
 
 const Metronome = () => {
   const [started, setStarted] = useReducer((state) => !state, false)
-  const [bpm, setBpm] =  useState(getCurrentTempo());
   const [time, setTime] = useReducer(timeReducer, {})
   const [beatsPerMeasure, setBeatsPerMeasure] = useState(4)
   const [beats, setBeats] = useState([getBeat(880), getBeat(440),getBeat(440),getBeat(440)])
 
+
   useEffect(() => {
     init({ beatsPerMeasure, beats})
-  }, [])
+  }, [beats, beatsPerMeasure])
 
   useEffect(() => {
     if (started) {
@@ -53,20 +47,12 @@ const Metronome = () => {
     }
   }, [started])
 
-  useEffect(() => {
-    if (started) {
-      setBpm(getCurrentTempo())
-      const interval = setInterval( () => setBpm(getCurrentTempo()), 20)
-      return () => clearInterval(interval)
-    }
-  }, [started])
 
   const doStart = () => {
     play()
     setTime({type: !started ? "START" : "STOP"})
     setStarted()
   }
-
   const keyMap = {
     UP_FIVE: "down",
     DOWN_FIVE: "up",
@@ -74,10 +60,10 @@ const Metronome = () => {
     DECREASE: "-",
     START: {sequence: "space", action: "keydown"}}
   const handlers = {
-    UP_FIVE: () => setBpm(incrementBpm(5-bpm%5)),
-    DOWN_FIVE: () => setBpm(incrementBpm(- (bpm%5 || 5))),
-    INCREASE: () => setBpm(incrementBpm(1)),
-    DECREASE: () => setBpm(incrementBpm(-1)),
+    UP_FIVE: () => incrementBpm(1, true, 5),
+    DOWN_FIVE: () => incrementBpm(-1, true, 5),
+    INCREASE: () => incrementBpm(1),
+    DECREASE: () => incrementBpm(-1),
     START: () => { doStart(!started) }
   }
 
@@ -101,7 +87,7 @@ const Metronome = () => {
     <div style={{marginBottom: "5px", display: "flex", alignItems:"center"}}>
       <DoubleArrow style={{transform: "rotate(180deg)"}} onClick={handlers.DOWN_FIVE} />
       <ChevronLeft onClick={handlers.DECREASE} />
-      <span style={{margin: "0 5px"}}>{bpm}</span>
+      <CurrentBpm started={started} />
       <ChevronRight onClick={handlers.INCREASE} />
       <DoubleArrow onClick={handlers.UP_FIVE} />
     </div>
