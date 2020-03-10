@@ -55,7 +55,7 @@ export function scheduleNote( beatNumber, time) {
   gain.connect( audioContext.destination );
 
   osc.frequency.value = beat.frequency;
-  gain.gain.value = beat.volume || 1
+  gain.gain.value = beat.volume !== undefined ? beat.volume : 1
 
   osc.start( time );
   osc.stop( time + noteLength );

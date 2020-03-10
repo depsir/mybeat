@@ -12,6 +12,7 @@ import AutoIncrement from "./autoIncrement"
 import { getCurrentBar } from "../lib/nodeQueue"
 import CurrentBpm from "./currentBpm"
 import { get, set } from 'idb-keyval';
+import { BEAT_MODES } from "../lib/domain"
 
 const currentBar = () => {
   return Math.floor(getCurrentBar());    // for res  = 2
@@ -27,13 +28,11 @@ const timeReducer = (state, action) => {
   return {...state, start: (new Date()).getTime()}
 }
 
-const getBeat = (f) => ({frequency: f})
-
 const Metronome = () => {
   const [started, setStarted] = useReducer((state) => !state, false)
   const [time, setTime] = useReducer(timeReducer, {})
   const [beatsPerMeasure, setBeatsPerMeasure] = useState(4)
-  const [beats, setBeats] = useState([getBeat(880), getBeat(440),getBeat(440),getBeat(440)])
+  const [beats, setBeats] = useState([BEAT_MODES.HIGH, BEAT_MODES.LOW, BEAT_MODES.LOW, BEAT_MODES.LOW ])
 
 
   useEffect(() => {
@@ -86,6 +85,16 @@ const Metronome = () => {
       increment: auto
     })
   }
+  const onBeatClick = (beatNumber) => {
+    const beatMode = beats[beatNumber].mode
+    const modes = Object.keys(BEAT_MODES)
+    const nextBeatMode = modes[(modes.indexOf(beatMode) + 1) % modes.length]
+    const nextBeats = [...beats]
+    
+    nextBeats.splice(beatNumber, 1, BEAT_MODES[nextBeatMode])
+    setBeats(nextBeats);
+  }
+
   return <div style={{display: 'flex', flexDirection:"column", alignItems: "center"}}>
     <GlobalHotKeys
       allowChanges
@@ -93,7 +102,7 @@ const Metronome = () => {
       handlers={handlers}
     />
     <h3>My Beat</h3>
-    <Bars numberOfBars={beatsPerMeasure} started={started} getCurrentBar={currentBar}/>
+    <Bars onClick={onBeatClick} beats={beats} numberOfBars={beatsPerMeasure} started={started} getCurrentBar={currentBar}/>
 
     { started ? <Stop onClick={handlers.START} /> : <PlayCircleOutline onClick={handlers.START} />}
 
