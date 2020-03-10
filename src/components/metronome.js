@@ -11,6 +11,7 @@ import ChevronLeft from "@material-ui/icons/ChevronLeft"
 import AutoIncrement from "./autoIncrement"
 import { getCurrentBar } from "../lib/nodeQueue"
 import CurrentBpm from "./currentBpm"
+import { get, set } from 'idb-keyval';
 
 const currentBar = () => {
   return Math.floor(getCurrentBar());    // for res  = 2
@@ -47,6 +48,18 @@ const Metronome = () => {
     }
   }, [started])
 
+
+  useEffect(() => {
+    async function f() {
+      const bpm = await get("bpm")
+      configure({tempo: bpm})
+    }
+    f()
+  }, [])
+
+  const onChangeTempo = (bpm) => {
+    set("bpm", bpm)
+  }
 
   const doStart = () => {
     play()
@@ -87,7 +100,7 @@ const Metronome = () => {
     <div style={{marginBottom: "5px", display: "flex", alignItems:"center"}}>
       <DoubleArrow style={{transform: "rotate(180deg)"}} onClick={handlers.DOWN_FIVE} />
       <ChevronLeft onClick={handlers.DECREASE} />
-      <CurrentBpm started={started} />
+      <CurrentBpm started={started} onChange={onChangeTempo}/>
       <ChevronRight onClick={handlers.INCREASE} />
       <DoubleArrow onClick={handlers.UP_FIVE} />
     </div>

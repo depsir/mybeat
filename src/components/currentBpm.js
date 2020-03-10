@@ -13,7 +13,7 @@ const useStyles = makeStyles({
   }
 })
 
-const CurrentBpm = ({started}) => {
+const CurrentBpm = ({started, onChange}) => {
   const [bpm, setBpm] =  useState(60);
   const [aboutToChange, setAboutToChange] = useState(false)
 
@@ -26,7 +26,11 @@ const CurrentBpm = ({started}) => {
         setAboutToChange((current.tempo) !== (next.tempo))
       }
 
-      setBpm(next && next.tempo || getConfig().tempo)
+      const tempo = next && next.tempo || getConfig().tempo
+      setBpm(tempo)
+      if (tempo !== bpm) {
+        onChange(tempo)
+      }
     }
       senseBpm()
       const interval = setInterval( senseBpm, 100)
