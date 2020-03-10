@@ -9,11 +9,7 @@ const useStyles = makeStyles({
     backgroundColor: props => props.aboutToChange ? "hsla(219,100%,50%,0.45)" : "inherit",
     margin: "0 5px",
     padding: "5px",
-    borderRadius: "70px",
-    width: "70px",
-    height: "70px",
     textAlign: "center",
-    border: "1px solid black"
   }
 })
 
