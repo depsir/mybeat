@@ -51,7 +51,9 @@ const Metronome = () => {
   useEffect(() => {
     async function f() {
       const bpm = await get("bpm")
-      configure({tempo: bpm})
+      if (bpm){
+        configure({tempo: bpm})
+      }
     }
     f()
   }, [])
