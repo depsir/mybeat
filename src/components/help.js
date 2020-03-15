@@ -40,6 +40,7 @@ const Help = ({ open }) => {
           <li><span>space</span> start/stop</li>
           <li><span>up</span> tempo down to prev 5</li>
           <li><span>down</span> tempo up to next 5</li>
+          <li><span>t</span> tap tempo</li>
         </ul>
       </div>
     </DialogContent>

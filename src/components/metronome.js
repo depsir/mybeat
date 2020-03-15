@@ -14,6 +14,7 @@ import CurrentBpm from "./currentBpm"
 import { get, set } from 'idb-keyval';
 import { BEAT_MODES } from "../lib/domain"
 import Volume from "./volume"
+import TapTempo from "./tapTempo"
 
 const currentBar = () => {
   return Math.floor(getCurrentBar());    // for res  = 2
@@ -128,6 +129,7 @@ const Metronome = () => {
     <Stopwatch started={started} showWhenStopped={false} startTime={started ? time.start : 0} elapsed={time.elapsed}/>
     <button onClick={() => setTime({type:"RESET"})}>reset</button>
     <Volume onChange={v => updateVolume(v)}/>
+    <TapTempo onChange={(bpm) => configure({tempo: bpm})}/>
   </div>
 }
 
