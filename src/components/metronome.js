@@ -13,6 +13,7 @@ import { getCurrentBar } from "../lib/nodeQueue"
 import CurrentBpm from "./currentBpm"
 import { get, set } from 'idb-keyval';
 import { BEAT_MODES } from "../lib/domain"
+import Volume from "./volume"
 
 const currentBar = () => {
   return Math.floor(getCurrentBar());    // for res  = 2
@@ -34,6 +35,11 @@ const Metronome = () => {
   const [beatsPerMeasure, setBeatsPerMeasure] = useState(4)
   const [beats, setBeats] = useState([BEAT_MODES.HIGH, BEAT_MODES.LOW, BEAT_MODES.LOW, BEAT_MODES.LOW ])
 
+  const updateVolume = (volume) => {
+    const nextBeats = beats.map(beat => ({...beat, volume: volume}))
+    setBeats(nextBeats)
+    configure({nextBeats})
+  }
 
   useEffect(() => {
     init({ beatsPerMeasure, beats})
@@ -92,7 +98,7 @@ const Metronome = () => {
     const modes = Object.keys(BEAT_MODES)
     const nextBeatMode = modes[(modes.indexOf(beatMode) + 1) % modes.length]
     const nextBeats = [...beats]
-    
+
     nextBeats.splice(beatNumber, 1, BEAT_MODES[nextBeatMode])
     setBeats(nextBeats);
   }
@@ -121,6 +127,7 @@ const Metronome = () => {
     <Stopwatch started={started} startTime={time.start}/>
     <Stopwatch started={started} showWhenStopped={false} startTime={started ? time.start : 0} elapsed={time.elapsed}/>
     <button onClick={() => setTime({type:"RESET"})}>reset</button>
+    <Volume onChange={v => updateVolume(v)}/>
   </div>
 }
 
