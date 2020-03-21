@@ -24,14 +24,18 @@ const timeReducer = (state, action) => {
   if (action.type === "RESET"){
     return {start: state.start}
   }
-  if (state.start) {
-   return {elapsed: (state.elapsed||0) + (new Date()).getTime() - state.start}
+
+  if (action.type === "STOP"){
+    return {start: state.start, elapsed: (state.elapsed||0) + (new Date()).getTime() - state.start}
   }
-  return {...state, start: (new Date()).getTime()}
+
+  if (action.type === "START"){
+    return {...state, start: (new Date()).getTime()}
+  }
 }
 
 const Metronome = () => {
-  const [started, setStarted] = useReducer((state) => !state, false)
+  const [started, setStarted] = useState(false)
   const [time, setTime] = useReducer(timeReducer, {})
   const [beatsPerMeasure, setBeatsPerMeasure] = useState(4)
   const [beats, setBeats] = useState([BEAT_MODES.HIGH, BEAT_MODES.LOW, BEAT_MODES.LOW, BEAT_MODES.LOW ])
@@ -72,7 +76,7 @@ const Metronome = () => {
   const doStart = () => {
     play()
     setTime({type: !started ? "START" : "STOP"})
-    setStarted()
+    setStarted(state => !state)
   }
   const keyMap = {
     UP_FIVE: "down",
@@ -85,7 +89,7 @@ const Metronome = () => {
     DOWN_FIVE: () => incrementBpm(-1, true, 5),
     INCREASE: () => incrementBpm(1),
     DECREASE: () => incrementBpm(-1),
-    START: () => { doStart(!started) }
+    START: doStart
   }
 
   const mapConfigure = ({ enabled, auto}) => {
@@ -126,7 +130,7 @@ const Metronome = () => {
 
     <AutoIncrement started={started} configure={mapConfigure}/>
     <Stopwatch started={started} startTime={time.start}/>
-    <Stopwatch started={started} showWhenStopped={false} startTime={started ? time.start : 0} elapsed={time.elapsed}/>
+    <Stopwatch started={started} startTime={time.start} elapsed={time.elapsed}/>
     <button onClick={() => setTime({type:"RESET"})}>reset</button>
     <Volume onChange={v => updateVolume(v)}/>
     <TapTempo onChange={(bpm) => configure({tempo: bpm})}/>
