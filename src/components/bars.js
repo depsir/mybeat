@@ -24,7 +24,10 @@ const styles = makeStyles(theme => ({
     backgroundColor: "hsl(99, 90%, 90%)"
   },
   [BEAT_MODES.MUTE.mode]: {
-    backgroundColor: "hsl(99, 0%, 20%)"
+    backgroundColor: "hsl(99, 100%, 100%)"
+  },
+  [BEAT_MODES.CLICK.mode]: {
+    backgroundColor: "hsl(99, 0%, 0%)"
   }
 }))
 

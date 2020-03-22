@@ -1,6 +1,7 @@
 import { INCREMENT, INCREMENT_UNIT } from "./domain"
 import { queue } from "./nodeQueue"
 import { audioContext, initAudioContext } from "./audioContext"
+import { getSound } from "./sounds"
 
 let current16thNote         // What note is currently last scheduled?
 let scheduleAheadTime = 0.1    // How far ahead to schedule audio (sec)
@@ -44,21 +45,22 @@ export function incrementBpm(delta, round=true, other){
   config.tempo = rounded;
 }
 
-export function scheduleNote( beatNumber, time) {
+export async function scheduleNote( beatNumber, time) {
 
   const beat = config.beats[beatNumber % config.beatsPerMeasure]
 
-  // create an oscillator
-  const osc = audioContext.createOscillator();
+  const osc = await getSound(beat)
+
   const gain = audioContext.createGain()
   osc.connect(gain);
   gain.connect( audioContext.destination );
 
-  osc.frequency.value = beat.frequency;
   gain.gain.value = beat.volume !== undefined ? beat.volume : 1
 
   osc.start( time );
-  osc.stop( time + noteLength );
+  if (beat.frequency){
+    osc.stop( time + noteLength );
+  }
 }
 
 export function nextNote(tempo) {
@@ -108,14 +110,14 @@ function incrementTempo(){
 }
 
 // call this periodically to schedule notes
-export function scheduleNextClicks() {
+export async function scheduleNextClicks() {
   // while there are notes that will need to play before the next interval,
   // schedule them and advance the pointer.
   while (nextNoteTime < audioContext.currentTime + scheduleAheadTime ) {
     incrementTempo()
     // push the note on the queue, even if we're not playing.
     queue.push( { note: current16thNote, time: nextNoteTime, tempo: config.tempo, currentNote } );
-    scheduleNote( current16thNote, nextNoteTime, config.tempo, currentNote);
+    await scheduleNote( current16thNote, nextNoteTime, config.tempo, currentNote);
     nextNote(config.tempo);
   }
 }

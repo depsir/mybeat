@@ -22,7 +22,7 @@ const currentBar = () => {
 
 const timeReducer = (state, action) => {
   if (action.type === "RESET"){
-    return {start: state.start}
+    return {start: (new Date()).getTime()}
   }
 
   if (action.type === "STOP"){
